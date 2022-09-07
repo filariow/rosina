@@ -24,7 +24,7 @@ type waterer struct {
 }
 
 func (w *waterer) waitAndReset() {
-	time.Sleep(100 * time.Millisecond)
+	time.Sleep(3000 * time.Millisecond)
 
 	w.pin1.Low()
 	w.pin2.Low()
