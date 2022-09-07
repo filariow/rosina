@@ -113,14 +113,10 @@ func run() error {
 
 	log.Printf("starting cronjob scheduler")
 
-	go s.StartBlocking()
+	go s.StartAsync()
 
-	c := make(chan struct{})
-	defer close(c)
-
-	<-c
-
-	return nil
+	for {
+	}
 }
 
 func buildWaterer(pin1, pin2 uint8, seconds uint64) func() {
