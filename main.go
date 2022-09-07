@@ -144,7 +144,7 @@ func buildWaterer(pin1, pin2 rpin.OutPin, seconds uint64) func() {
 		log.Printf("Waiting %d seconds (i.e. %s)", seconds, l)
 		time.Sleep(wt)
 
-		log.Println("Opening water")
+		log.Println("Closing water")
 		w.Close()
 	}
 }
