@@ -1,24 +1,43 @@
 package water
 
-import "github.com/filariow/rosina/internal/rpin"
+import (
+	"time"
+
+	"github.com/filariow/rosina/internal/rpin"
+)
 
 type Waterer interface {
 	Open()
 	Close()
 }
 
-func New(outpin rpin.OutPin) Waterer {
-	return &waterer{pin: outpin}
+func New(outpin1, outpin2 rpin.OutPin) Waterer {
+	return &waterer{
+		pin1: outpin1,
+		pin2: outpin2,
+	}
 }
 
 type waterer struct {
-	pin rpin.OutPin
+	pin1 rpin.OutPin
+	pin2 rpin.OutPin
+}
+
+func (w *waterer) waitAndReset() {
+	time.Sleep(100 * time.Millisecond)
+
+	w.pin1.Low()
+	w.pin2.Low()
 }
 
 func (w *waterer) Open() {
-	w.pin.High()
+	defer w.waitAndReset()
+
+	w.pin1.High()
 }
 
 func (w *waterer) Close() {
-	w.pin.Low()
+	defer w.waitAndReset()
+
+	w.pin2.High()
 }
