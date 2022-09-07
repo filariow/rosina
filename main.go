@@ -106,11 +106,21 @@ func run() error {
 	}
 	log.Printf("waterer pin2: %d", p2)
 
+	pin1, err := rpin.New(p1)
+	if err != nil {
+		return fmt.Errorf("error accessing waterer pin1 (pin %d): %w", p1, err)
+	}
+
+	pin2, err := rpin.New(p2)
+	if err != nil {
+		return fmt.Errorf("error accessing waterer pin1 (pin %d): %w", p1, err)
+	}
+
 	s := gocron.NewScheduler(time.UTC)
 	for _, d := range ss {
 		s.
 			Cron(d.CronExpr).
-			Do(buildWaterer(p1, p2, d.DurationSeconds))
+			Do(buildWaterer(pin1, pin2, d.DurationSeconds))
 		log.Printf("added cron job for expression %s", d.CronExpr)
 	}
 
@@ -122,10 +132,8 @@ func run() error {
 	return ctx.Err()
 }
 
-func buildWaterer(pin1, pin2 uint8, seconds uint64) func() {
-	p1 := rpin.New(pin1)
-	p2 := rpin.New(pin2)
-	w := water.New(p1, p2)
+func buildWaterer(pin1, pin2 rpin.OutPin, seconds uint64) func() {
+	w := water.New(pin1, pin2)
 
 	return func() {
 		log.Println("Opening water")
