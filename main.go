@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
@@ -85,6 +86,8 @@ func getPinNumer(envVar string) (uint8, error) {
 }
 
 func run() error {
+	ctx := context.Background()
+
 	ss, err := getSchedules()
 	if err != nil {
 		return err
@@ -115,8 +118,8 @@ func run() error {
 
 	go s.StartAsync()
 
-	for {
-	}
+	<-ctx.Done()
+	return ctx.Err()
 }
 
 func buildWaterer(pin1, pin2 uint8, seconds uint64) func() {
