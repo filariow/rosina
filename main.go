@@ -14,7 +14,8 @@ import (
 )
 
 const (
-	EnvWatererPin       = "ROSINA_WATERER_PIN"
+	EnvWatererPin1      = "ROSINA_WATERER_PIN1"
+	EnvWatererPin2      = "ROSINA_WATERER_PIN2"
 	EnvWatererSchedules = "ROSINA_WATERER_SCHEDULES"
 )
 
@@ -67,17 +68,17 @@ func getSchedules() ([]Schedule, error) {
 	return ss, nil
 }
 
-func getPinNumer() (uint8, error) {
-	wp := os.Getenv(EnvWatererPin)
+func getPinNumer(envVar string) (uint8, error) {
+	wp := os.Getenv(envVar)
 	if wp == "" {
-		return 0, fmt.Errorf("Waterer Pin environment variable (%s) must be set", EnvWatererPin)
+		return 0, fmt.Errorf("Waterer Pin environment variable (%s) must be set", envVar)
 	}
 
 	n, err := strconv.ParseUint(wp, 10, 8)
 	if err != nil {
 		return 0, fmt.Errorf(
 			"error parsing Waterer Pin environment variable (%s) value (%s) to uint8: %w",
-			EnvWatererPin, wp, err)
+			envVar, wp, err)
 	}
 
 	return uint8(n), nil
@@ -89,7 +90,12 @@ func run() error {
 		return err
 	}
 
-	p, err := getPinNumer()
+	p1, err := getPinNumer(EnvWatererPin1)
+	if err != nil {
+		return err
+	}
+
+	p2, err := getPinNumer(EnvWatererPin2)
 	if err != nil {
 		return err
 	}
@@ -98,16 +104,16 @@ func run() error {
 	for _, d := range ss {
 		s.
 			Cron(d.CronExpr).
-			Do(buildWaterer(p, d.DurationSeconds))
-
+			Do(buildWaterer(p1, p2, d.DurationSeconds))
 	}
 
 	return nil
 }
 
-func buildWaterer(pin uint8, seconds uint64) func() {
-	p := rpin.New(pin)
-	w := water.New(p)
+func buildWaterer(pin1, pin2 uint8, seconds uint64) func() {
+	p1 := rpin.New(pin1)
+	p2 := rpin.New(pin2)
+	w := water.New(p1, p2)
 
 	return func() {
 		log.Println("Opening water")
