@@ -112,7 +112,13 @@ func run() error {
 	}
 
 	log.Printf("starting cronjob scheduler")
-	s.StartBlocking()
+
+	go s.StartBlocking()
+
+	c := make(chan struct{})
+	defer close(c)
+
+	<-c
 
 	return nil
 }
