@@ -89,23 +89,30 @@ func run() error {
 	if err != nil {
 		return err
 	}
+	log.Printf("retrieved schedules: %v", ss)
 
 	p1, err := getPinNumer(EnvWatererPin1)
 	if err != nil {
 		return err
 	}
+	log.Printf("waterer pin1: %d", p1)
 
 	p2, err := getPinNumer(EnvWatererPin2)
 	if err != nil {
 		return err
 	}
+	log.Printf("waterer pin2: %d", p2)
 
 	s := gocron.NewScheduler(time.UTC)
 	for _, d := range ss {
 		s.
 			Cron(d.CronExpr).
 			Do(buildWaterer(p1, p2, d.DurationSeconds))
+		log.Printf("added cron job for expression %s", d.CronExpr)
 	}
+
+	log.Printf("starting cronjob scheduler")
+	s.StartBlocking()
 
 	return nil
 }
